@@ -1,10 +1,11 @@
 import os
+from os.path import expanduser
 import wx
 import sys
 import socket
 import netifaces
 import subprocess
-from os.path import expanduser
+
 
 cwd = os.getcwd()
 homeDirectory = expanduser("~")
