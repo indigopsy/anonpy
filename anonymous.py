@@ -3,8 +3,43 @@
 from config import *
 import wx
 import os
-import socket
 import sys
+
+
+def on_start(event):
+    print 'Start'
+
+    checkDirectories(anonDirectory)
+    checkDirectories(backupDirectory)
+
+    checkFiles(anonFile)
+    checkFiles(torFile)
+    checkFiles(torrcFile)
+    checkFiles(logFile)
+
+    return event
+
+
+def on_stop(event):
+    print 'Stop'
+    return event
+
+
+def on_status(event):
+    print 'Status'
+    return event
+
+
+def on_exit(self):
+    dlgExit = wx.MessageBox('Do you want to stop Anonymous mode?',
+                            'Anonymous',
+                            wx.YES_NO)
+
+    if dlgExit == wx.YES:
+        on_stop('Exiting')
+
+    wx.CallAfter(self.Destroy)
+    sys.exit('User exited.')
 
 
 def create_menu_item(menu, label, func):
@@ -16,11 +51,7 @@ def create_menu_item(menu, label, func):
 
 def on_left_down(event):
     print 'Tray icon was left-clicked.'
-    print homeDirectory
-    print anonDirectory
-    print backupDirectory
-    print cwd
-    print socket.gethostname()
+    return event
 
 
 class TaskBarIcon(wx.TaskBarIcon):
@@ -30,42 +61,30 @@ class TaskBarIcon(wx.TaskBarIcon):
         self.Bind(wx.EVT_TASKBAR_LEFT_DOWN, on_left_down)
 
     def CreatePopupMenu(self):
+        print 'Tray icon was right-clicked.'
         menu = wx.Menu()
-        create_menu_item(menu, 'Start', self.on_start)
-        create_menu_item(menu, 'Status', self.on_status)
-        create_menu_item(menu, 'Stop', self.on_stop)
+        create_menu_item(menu, 'Start', on_start)
+        create_menu_item(menu, 'Status', on_status)
+        create_menu_item(menu, 'Stop', on_stop)
         menu.AppendSeparator()
-        create_menu_item(menu, 'Exit', self.on_exit)
+        create_menu_item(menu, 'Exit', on_exit)
         return menu
 
     def set_icon(self, path):
         icon = wx.IconFromBitmap(wx.Bitmap(path))
         self.SetIcon(icon, trayTooltip)
 
-    def on_start(self, event):
-        print 'Start'
 
-    def on_status(self, event):
-        print 'Status'
-
-    def on_stop(self, event):
-        print 'Stop'
-
-    def on_exit(self, event):
-        wx.CallAfter(self.Destroy)
-        sys.exit('User exited.')
+def checkDirectories(dir_name):
+    if not os.path.exists(dir_name):
+        os.makedirs(dir_name)
 
 
-def checkDirectories(dirName):
-    if not os.path.exists(dirName):
-        os.makedirs(dirName)
-
-
-def checkFiles(fileName):
-    if os.path.isfile(fileName) and os.access(fileName, os.R_OK):
+def checkFiles(file_name):
+    if os.path.isfile(file_name) and os.access(file_name, os.R_OK):
         print ('File exists and is readable')
     else:
-        if fileName == anonFile:
+        if file_name == anonFile:
             dlgStart = wx.MessageBox('Script couldn\'t find configuration file!\n' +
                                      'Do you want to make a new one? ',
                                      'Anonymous',
@@ -74,7 +93,6 @@ def checkFiles(fileName):
             if dlgStart == wx.NO:
                 sys.exit('User cancel configuration.')
 
-            # ###
             anon_hostname()
             anon_random_hostname()
             anon_nameserver()
@@ -85,11 +103,11 @@ def checkFiles(fileName):
             anon_bleachbit_cleaners()
             return True
 
-        elif fileName == torFile:
+        elif file_name == torFile:
             print '1'
-        elif fileName == torrcFile:
+        elif file_name == torrcFile:
             print '1'
-        elif fileName == logFile:
+        elif file_name == logFile:
             print '1'
         else:
             print 'what???'
@@ -98,14 +116,6 @@ def checkFiles(fileName):
 def main():
     app = wx.App()
     TaskBarIcon()
-
-    checkDirectories(anonDirectory)
-    checkDirectories(backupDirectory)
-
-    checkFiles(anonFile)
-    checkFiles(torFile)
-    checkFiles(torrcFile)
-    checkFiles(logFile)
 
     app.MainLoop()
 
