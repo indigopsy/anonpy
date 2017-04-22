@@ -51,6 +51,7 @@ def create_menu_item(menu, label, func):
 
 def on_left_down(event):
     print 'Tray icon was left-clicked.'
+    on_start(event)
     return event
 
 
